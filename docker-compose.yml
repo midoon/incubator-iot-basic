@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  # Eclipse Mosquitto MQTT Broker
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: incubator-mosquitto
+    ports:
+      - "1883:1883" # MQTT
+      - "9001:9001" # WebSocket (opsional, untuk debugging)
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    restart: unless-stopped
+    networks:
+      - incubator-net
+
+  # Go Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: incubator-backend
+    ports:
+      - "8080:8080"
+    environment:
+      APP_PORT: "8080"
+      MQTT_BROKER: "mqtt://mosquitto:1883"
+      MQTT_CLIENT_ID: "incubator-backend"
+      MQTT_TOPIC_TEMPERATURE: "incubator/temperature"
+      MQTT_TOPIC_HUMIDITY: "incubator/humidity"
+      MQTT_TOPIC_MODE: "incubator/mode"
+      MQTT_TOPIC_LAMP: "incubator/lamp"
+      MQTT_TOPIC_CMD_MODE: "incubator/cmd/mode"
+      MQTT_TOPIC_CMD_LAMP: "incubator/cmd/lamp"
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+    networks:
+      - incubator-net
+
+  # Vue.js Frontend (served via Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: incubator-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - incubator-net
+
+networks:
+  incubator-net:
+    driver: bridge
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:

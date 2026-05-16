@@ -1,0 +1,30 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build output
+*.test
+*.out
+coverage.out
+
+# Dependency directories
+vendor/
+Godeps/
+_glide/
+_gopath/
+bin/
+
+# Go build cache
+*.cache
+*.tmp
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store

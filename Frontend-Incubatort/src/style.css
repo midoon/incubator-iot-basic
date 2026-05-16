@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-warm-50: #fdf8f0;
+  --color-warm-100: #faefd9;
+  --color-warm-200: #f5ddb0;
+  --color-warm-300: #eec67d;
+  --color-warm-400: #e6a84a;
+  --color-warm-500: #de8f2a;
+  --color-warm-600: #c97420;
+  --color-warm-700: #a75a1d;
+  --color-warm-800: #86481f;
+  --color-warm-900: #6d3c1c;
+}
+
+@layer base {
+  body {
+    @apply bg-warm-50 text-gray-800 antialiased;
+  }
+}
+
+@layer utilities {
+  /* Animasi pulse ringan untuk indikator realtime */
+  .pulse-dot {
+    animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+}
