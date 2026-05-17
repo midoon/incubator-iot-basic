@@ -1,9 +1,10 @@
-const SSE_URL = '/api/stream'
+const BACKEND_HOST = `${window.location.hostname}:8080`;
+const SSE_URL = `http://${BACKEND_HOST}/api/stream`;
 
-let eventSource = null
-let reconnectTimer = null
-let onMessageCallback = null
-let onStatusChangeCallback = null
+let eventSource = null;
+let reconnectTimer = null;
+let onMessageCallback = null;
+let onStatusChangeCallback = null;
 
 /**
  * Memulai koneksi SSE ke backend.
@@ -11,64 +12,64 @@ let onStatusChangeCallback = null
  * @param {Function} onStatusChange - dipanggil saat status koneksi berubah
  */
 export function connectSSE(onMessage, onStatusChange) {
-  onMessageCallback = onMessage
-  onStatusChangeCallback = onStatusChange
+  onMessageCallback = onMessage;
+  onStatusChangeCallback = onStatusChange;
 
-  connect()
+  connect();
 }
 
 function connect() {
   if (eventSource) {
-    eventSource.close()
+    eventSource.close();
   }
 
-  notifyStatus('connecting')
+  notifyStatus("connecting");
 
-  eventSource = new EventSource(SSE_URL)
+  eventSource = new EventSource(SSE_URL);
 
   eventSource.onopen = () => {
-    console.log('[SSE] Connected')
-    notifyStatus('connected')
-    clearReconnectTimer()
-  }
+    console.log("[SSE] Connected");
+    notifyStatus("connected");
+    clearReconnectTimer();
+  };
 
   eventSource.onmessage = (event) => {
     try {
-      const data = JSON.parse(event.data)
+      const data = JSON.parse(event.data);
       if (onMessageCallback) {
-        onMessageCallback(data)
+        onMessageCallback(data);
       }
     } catch (err) {
-      console.error('[SSE] Failed to parse message:', err)
+      console.error("[SSE] Failed to parse message:", err);
     }
-  }
+  };
 
   eventSource.onerror = () => {
-    console.warn('[SSE] Connection error, will reconnect...')
-    notifyStatus('disconnected')
-    eventSource.close()
-    scheduleReconnect()
-  }
+    console.warn("[SSE] Connection error, will reconnect...");
+    notifyStatus("disconnected");
+    eventSource.close();
+    scheduleReconnect();
+  };
 }
 
 function scheduleReconnect() {
-  clearReconnectTimer()
+  clearReconnectTimer();
   reconnectTimer = setTimeout(() => {
-    console.log('[SSE] Reconnecting...')
-    connect()
-  }, 3000) // Reconnect setiap 3 detik
+    console.log("[SSE] Reconnecting...");
+    connect();
+  }, 3000); // Reconnect setiap 3 detik
 }
 
 function clearReconnectTimer() {
   if (reconnectTimer) {
-    clearTimeout(reconnectTimer)
-    reconnectTimer = null
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
   }
 }
 
 function notifyStatus(status) {
   if (onStatusChangeCallback) {
-    onStatusChangeCallback(status)
+    onStatusChangeCallback(status);
   }
 }
 
@@ -76,10 +77,10 @@ function notifyStatus(status) {
  * Menutup koneksi SSE dan membersihkan semua timer.
  */
 export function disconnectSSE() {
-  clearReconnectTimer()
+  clearReconnectTimer();
   if (eventSource) {
-    eventSource.close()
-    eventSource = null
+    eventSource.close();
+    eventSource = null;
   }
-  notifyStatus('disconnected')
+  notifyStatus("disconnected");
 }

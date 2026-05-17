@@ -1,0 +1,1 @@
+- error fetch ganti mode dari auto ke manual
