@@ -14,6 +14,7 @@ type incubatorUsecase struct {
 
 func NewIncubatorUsecase(repo domain.IncubatorRepository) domain.IncubatorUsecase {
 	return &incubatorUsecase{
+		repo: repo,
 		state: domain.IncubatorState{
 			Temperature: 0,
 			Humidity:    0,

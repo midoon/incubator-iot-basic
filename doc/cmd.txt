@@ -1,0 +1,10 @@
+Menjalankan musquito manual:
+
+pastikan sudha ada folder ini (minimal):
+project/
+└── mosquitto/
+    ├── config/
+    │   └── mosquitto.conf
+
+
+$ docker run -it -p 1883:1883 -v "$PWD/mosquitto/config:/mosquitto/config" eclipse-mosquitto

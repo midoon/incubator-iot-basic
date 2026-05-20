@@ -24,8 +24,8 @@ func NewRouter(h *httphandler.Handler) http.Handler {
 	api.HandleFunc("/stream", h.HandleSSE).Methods(http.MethodGet)
 
 	// POST — action dari frontend.
-	api.HandleFunc("/mode", h.HandleSetMode).Methods(http.MethodPost)
-	api.HandleFunc("/lamp", h.HandleSetLamp).Methods(http.MethodPost)
+	api.HandleFunc("/mode", h.HandleSetMode).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/lamp", h.HandleSetLamp).Methods(http.MethodPost, http.MethodOptions)
 
 	return r
 }
