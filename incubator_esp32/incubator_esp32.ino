@@ -10,12 +10,12 @@
 // ============================================================
 
 // WiFi
-const char* WIFI_SSID     = "NAMA_WIFI_KAMU";
-const char* WIFI_PASSWORD = "PASSWORD_WIFI_KAMU";
+const char* WIFI_SSID     = "HELL-PARADISE";
+const char* WIFI_PASSWORD = "torabika";
 
 // MQTT Broker — isi dengan IP komputer yang menjalankan Mosquitto
 // Contoh: "192.168.1.100"
-const char* MQTT_BROKER   = "192.168.1.100";
+const char* MQTT_BROKER   = "10.10.20.254";
 const int   MQTT_PORT     = 1883;
 const char* MQTT_CLIENT_ID = "esp32-incubator";
 
@@ -31,7 +31,7 @@ const char* TOPIC_CMD_LAMP    = "incubator/cmd/lamp";
 
 // Pin
 #define DHTPIN    4
-#define DHTTYPE   DHT22
+#define DHTTYPE   DHT11
 #define RELAY_PIN 5
 
 // Interval publish sensor (ms)
@@ -67,7 +67,7 @@ void setRelay(bool on) {
   lampState = on;
   // Relay aktif HIGH — sesuaikan dengan modul relay kamu
   // Jika relay aktif LOW, ganti HIGH ↔ LOW di bawah
-  digitalWrite(RELAY_PIN, on ? HIGH : LOW);
+  digitalWrite(RELAY_PIN, on ? LOW : HIGH);
   Serial.print("[RELAY] ");
   Serial.println(on ? "ON" : "OFF");
 }
@@ -77,13 +77,13 @@ void setRelay(bool on) {
 // ============================================================
 
 void publishSensorData(float temperature, float humidity) {
-  StaticJsonDocument<64> tempDoc;
+  JsonDocument  tempDoc;
   tempDoc["temperature"] = round(temperature * 10.0) / 10.0; // 1 desimal
   char tempBuf[32];
   serializeJson(tempDoc, tempBuf);
   mqttClient.publish(TOPIC_TEMPERATURE, tempBuf);
 
-  StaticJsonDocument<64> humDoc;
+  JsonDocument  humDoc;
   humDoc["humidity"] = round(humidity);
   char humBuf[32];
   serializeJson(humDoc, humBuf);
@@ -94,14 +94,14 @@ void publishSensorData(float temperature, float humidity) {
 
 void publishStatus() {
   // Publish mode saat ini
-  StaticJsonDocument<32> modeDoc;
+  JsonDocument  modeDoc;
   modeDoc["mode"] = currentMode;
   char modeBuf[32];
   serializeJson(modeDoc, modeBuf);
   mqttClient.publish(TOPIC_MODE, modeBuf, true); // retain=true agar backend tahu state awal
 
   // Publish status lampu saat ini
-  StaticJsonDocument<32> lampDoc;
+  JsonDocument  lampDoc;
   lampDoc["lamp"] = lampState;
   char lampBuf[32];
   serializeJson(lampDoc, lampBuf);
@@ -120,7 +120,7 @@ void onMQTTMessage(char* topic, byte* payload, unsigned int length) {
 
   Serial.printf("[MQTT] Received ← topic: %s, payload: %s\n", topic, message);
 
-  StaticJsonDocument<64> doc;
+  JsonDocument doc;
   DeserializationError err = deserializeJson(doc, message);
   if (err) {
     Serial.print("[MQTT] JSON parse error: ");
@@ -130,7 +130,7 @@ void onMQTTMessage(char* topic, byte* payload, unsigned int length) {
 
   // ----- Command: ganti mode -----
   if (String(topic) == TOPIC_CMD_MODE) {
-    if (!doc.containsKey("mode")) return;
+    if (!doc["mode"].is<String>()) return;
 
     String newMode = doc["mode"].as<String>();
 
@@ -155,7 +155,7 @@ void onMQTTMessage(char* topic, byte* payload, unsigned int length) {
 
   // ----- Command: kontrol lampu (hanya berlaku di mode manual) -----
   else if (String(topic) == TOPIC_CMD_LAMP) {
-    if (!doc.containsKey("lamp")) return;
+    if (!doc["lamp"].is<bool>()) return;
 
     if (currentMode != "manual") {
       Serial.println("[CMD] Lamp command ignored — not in manual mode.");
@@ -260,6 +260,21 @@ void setup() {
   // Inisialisasi pin relay
   pinMode(RELAY_PIN, OUTPUT);
   setRelay(false); // Pastikan relay mati saat startup
+
+  Wire.begin(21, 22); // SDA, SCL — ubah jika pakai pin lain
+  Serial.println("\n=== I2C Scanner ===");
+
+  byte count = 0;
+  for (byte addr = 1; addr < 127; addr++) {
+    Wire.beginTransmission(addr);
+    if (Wire.endTransmission() == 0) {
+      Serial.printf("Found device at 0x%02X\n", addr);
+      count++;
+    }
+  }
+
+  if (count == 0) Serial.println("No I2C device found!");
+  else Serial.printf("Done. %d device(s) found.\n", count);
 
   // Inisialisasi LCD
   lcd.init();
