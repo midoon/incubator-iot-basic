@@ -1,5 +1,4 @@
-# Stage 1: build binary
-FROM golang:1.21.14-alpine3.20 AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
