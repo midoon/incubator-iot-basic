@@ -1,5 +1,5 @@
-const BASE_URL = `http://${window.location.hostname}:8080/api`;
-
+// const BASE_URL = `http://${window.location.hostname}:8080/api`;
+const BASE_URL = `${window.location.origin}/api`;
 /**
  * Mengambil state terkini dari backend (untuk initial load).
  */

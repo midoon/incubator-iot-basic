@@ -1,5 +1,7 @@
-const BACKEND_HOST = `${window.location.hostname}:8080`;
-const SSE_URL = `http://${BACKEND_HOST}/api/stream`;
+// const BACKEND_HOST = `${window.location.hostname}:8080`;
+// const SSE_URL = `http://${BACKEND_HOST}/api/stream`;
+
+const SSE_URL = `${window.location.origin}/api/stream`;
 
 let eventSource = null;
 let reconnectTimer = null;

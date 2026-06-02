@@ -7,4 +7,66 @@ project/
     │   └── mosquitto.conf
 
 
-$ docker run -it -p 1883:1883 -v "$PWD/mosquitto/config:/mosquitto/config" eclipse-mosquitto
+
+
+buat network:
+
+docker network create incubator-net
+
+
+
+docker run -d \
+--name mosquitto \
+--network incubator-net \
+-p 1883:1883 \
+-v $(pwd)/mosquitto/config:/mosquitto/config \
+-v $(pwd)/mosquitto/data:/mosquitto/data \
+-v $(pwd)/mosquitto/log:/mosquitto/log \
+--restart unless-stopped \
+eclipse-mosquitto
+
+
+
+
+===============================================================
+==> menjalankan docker container
+
+docker build -t backend-incubator .
+
+docker run -d \
+--name backend-incubator \
+--network incubator-net \
+-p 8080:8080 \
+backend-incubator
+
+
+
+ubah file env golang:
+
+APP_PORT=8080
+
+MQTT_BROKER=tcp://mosquitto:1883
+MQTT_CLIENT_ID=incubator-backend
+
+MQTT_TOPIC_TEMPERATURE=incubator/temperature
+MQTT_TOPIC_HUMIDITY=incubator/humidity
+MQTT_TOPIC_MODE=incubator/mode
+MQTT_TOPIC_LAMP=incubator/lamp
+MQTT_TOPIC_CMD_MODE=incubator/cmd/mode
+MQTT_TOPIC_CMD_LAMP=incubator/cmd/lamp
+
+
+
+
+===============================================================
+
+==> docker container frontend:
+
+docker build -t frontend-incubator .
+
+docker run -d \
+--name frontend-incubator \
+--network incubator-net \
+-p 5050:80 \
+--restart unless-stopped \
+frontend-incubator

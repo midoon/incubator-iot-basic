@@ -1,22 +1,21 @@
-# Stage 1: build Vue app
+# Stage 1: Build Vue app
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 RUN npm run build
 
-# Stage 2: serve dengan Nginx
+# Stage 2: Nginx
 FROM nginx:alpine
 
-# Copy hasil build ke direktori Nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Config Nginx untuk Vue Router (history mode) + proxy ke backend
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
