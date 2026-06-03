@@ -29,17 +29,7 @@ eclipse-mosquitto
 
 
 ===============================================================
-==> menjalankan docker container
-
-docker build -t backend-incubator .
-
-docker run -d \
---name backend-incubator \
---network incubator-net \
--p 8080:8080 \
-backend-incubator
-
-
+==> menjalankan docker container (masuk ke folder backend)
 
 ubah file env golang:
 
@@ -54,6 +44,18 @@ MQTT_TOPIC_MODE=incubator/mode
 MQTT_TOPIC_LAMP=incubator/lamp
 MQTT_TOPIC_CMD_MODE=incubator/cmd/mode
 MQTT_TOPIC_CMD_LAMP=incubator/cmd/lamp
+
+docker build -t backend-incubator .
+
+docker run -d \
+--name backend-incubator \
+--network incubator-net \
+-p 8080:8080 \
+backend-incubator
+
+
+
+
 
 
 
